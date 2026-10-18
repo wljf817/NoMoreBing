@@ -3,12 +3,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   CUSTOM_ID,
+  FALLBACK_ENGINE_ID,
   PLACEHOLDER_SEARCH_URL,
   PRESETS,
   SEARCH_RULE_ID,
   buildRules,
+  defaultSetting,
   isValidTemplate,
+  presetForSuggestUrl,
   resolveEngine,
+  toManifestTemplate,
 } from '../src/engines.js';
 
 const readJson = (path) => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'));
@@ -49,6 +53,16 @@ test('resolveEngine falls back to the default preset', () => {
   assert.equal(resolveEngine(undefined).searchUrl, google.searchUrl);
   assert.equal(resolveEngine({ id: 'nope' }).searchUrl, google.searchUrl);
   assert.equal(resolveEngine({ id: CUSTOM_ID, searchUrl: 'bad' }).searchUrl, google.searchUrl);
+});
+
+test('the default engine follows the build suggestion provider', () => {
+  for (const p of PRESETS) {
+    assert.equal(presetForSuggestUrl(toManifestTemplate(p.suggestUrl)), p);
+    assert.deepEqual(defaultSetting(toManifestTemplate(p.suggestUrl)), { id: p.id });
+  }
+  assert.equal(presetForSuggestUrl(undefined), null);
+  assert.deepEqual(defaultSetting(undefined), { id: FALLBACK_ENGINE_ID });
+  assert.deepEqual(defaultSetting('https://example.com/?q={searchTerms}'), { id: FALLBACK_ENGINE_ID });
 });
 
 test('resolveEngine keeps a valid custom engine', () => {
@@ -96,8 +110,7 @@ test('manifest search provider uses the placeholder the rules redirect', () => {
 
 test('manifest suggest_url is one of the preset suggestion URLs', () => {
   const provider = readJson('../manifest.json').chrome_settings_overrides.search_provider;
-  const templates = PRESETS.map((p) => p.suggestUrl.replace('%s', '{searchTerms}'));
-  assert.ok(templates.includes(provider.suggest_url), provider.suggest_url);
+  assert.ok(presetForSuggestUrl(provider.suggest_url), provider.suggest_url);
 });
 
 test('manifest search provider has the keys Chromium requires without prepopulated_id', () => {

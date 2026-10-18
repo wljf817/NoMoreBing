@@ -50,7 +50,22 @@ export const PRESETS = [
 ];
 
 export const CUSTOM_ID = 'custom';
-export const DEFAULT_SETTING = { id: 'google' };
+export const FALLBACK_ENGINE_ID = 'google';
+
+// Converts a `%s` template to the `{searchTerms}` form used in manifest.json.
+export const toManifestTemplate = (template) => template.replace('%s', '{searchTerms}');
+
+// The preset a build's manifest suggest_url belongs to, or null for a build
+// without suggestions.
+export function presetForSuggestUrl(suggestUrl) {
+  return PRESETS.find((p) => toManifestTemplate(p.suggestUrl) === suggestUrl) ?? null;
+}
+
+// Until the user picks an engine, search with the provider the build's
+// suggestions come from, so search and suggestions match out of the box.
+export function defaultSetting(suggestUrl) {
+  return { id: presetForSuggestUrl(suggestUrl)?.id ?? FALLBACK_ENGINE_ID };
+}
 
 // A template is an http(s) URL containing `%s` exactly once. Backslashes are
 // rejected because they are special in DNR regexSubstitution.
@@ -74,7 +89,7 @@ export function resolveEngine(setting) {
   }
   const preset =
     PRESETS.find((p) => p.id === setting?.id) ??
-    PRESETS.find((p) => p.id === DEFAULT_SETTING.id);
+    PRESETS.find((p) => p.id === FALLBACK_ENGINE_ID);
   return { searchUrl: preset.searchUrl };
 }
 

@@ -8,9 +8,14 @@
   "engineCustom": { "message": "自定义" },
   "engine_baidu": { "message": "百度" },
   "customSearchLabel": { "message": "搜索地址（用 %s 表示搜索词）" },
-  "customSuggestLabel": { "message": "联想地址（可选，用 %s 表示搜索词）" },
   "save": { "message": "保存" },
   "saved": { "message": "已保存。" },
   "errorTemplate": { "message": "地址必须以 http:// 或 https:// 开头，并且只包含一个 %s。" },
+  "suggestSource": {
+    "message": "地址栏联想来自 $ENGINE$。联想来源由你安装的版本决定，在上面切换搜索引擎不会改变它。",
+    "placeholders": { "engine": { "content": "$1" } }
+  },
+  "suggestOff": { "message": "你安装的版本不提供地址栏联想。" },
+  "suggestHowToOff": { "message": "想关闭联想，可以在 edge://settings/search 里关掉“使用我键入的字符显示搜索和站点建议”。" },
   "howItWorks": { "message": "Edge 会把地址栏搜索发往一个永远无法访问的占位地址，NoMoreBing 在请求离开浏览器之前把它重定向到你选的引擎。想把控制权交还给 Edge，关闭或移除本扩展即可。" }
 }

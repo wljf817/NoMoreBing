@@ -1,14 +1,15 @@
-import { CUSTOM_ID, PRESETS, isValidTemplate } from '../engines.js';
-import { getEngineSetting, setEngineSetting } from '../settings.js';
+import { CUSTOM_ID, PRESETS, isValidTemplate, presetForSuggestUrl } from '../engines.js';
+import { getEngineSetting, manifestSuggestUrl, setEngineSetting } from '../settings.js';
 
-const t = (key) => chrome.i18n.getMessage(key);
+const t = (key, substitutions) => chrome.i18n.getMessage(key, substitutions);
+const engineName = (preset) => t(`engine_${preset.id}`) || preset.name;
 
 const form = document.getElementById('form');
 const engines = document.getElementById('engines');
 const custom = document.getElementById('custom');
 const customSearch = document.getElementById('custom-search');
-const customSuggest = document.getElementById('custom-suggest');
 const status = document.getElementById('status');
+const suggestSource = document.getElementById('suggest-source');
 
 function localize() {
   document.documentElement.lang = chrome.i18n.getUILanguage();
@@ -20,7 +21,7 @@ function localize() {
 
 function renderEngines() {
   const choices = [
-    ...PRESETS.map((p) => ({ id: p.id, name: t(`engine_${p.id}`) || p.name })),
+    ...PRESETS.map((p) => ({ id: p.id, name: engineName(p) })),
     { id: CUSTOM_ID, name: t('engineCustom') },
   ];
   for (const { id, name } of choices) {
@@ -34,6 +35,13 @@ function renderEngines() {
   }
 }
 
+// Suggestions are fixed by the package the user installed, not by the engine
+// picked here, so say where they come from.
+function renderSuggestSource() {
+  const preset = presetForSuggestUrl(manifestSuggestUrl());
+  suggestSource.textContent = preset ? t('suggestSource', [engineName(preset)]) : t('suggestOff');
+}
+
 function showStatus(message, isError = false) {
   status.textContent = message;
   status.classList.toggle('error', isError);
@@ -43,10 +51,7 @@ async function load() {
   const setting = await getEngineSetting();
   const radio = engines.querySelector(`input[value="${CSS.escape(setting.id)}"]`);
   if (radio) radio.checked = true;
-  if (setting.id === CUSTOM_ID) {
-    customSearch.value = setting.searchUrl ?? '';
-    customSuggest.value = setting.suggestUrl ?? '';
-  }
+  if (setting.id === CUSTOM_ID) customSearch.value = setting.searchUrl ?? '';
   custom.hidden = setting.id !== CUSTOM_ID;
 }
 
@@ -65,15 +70,15 @@ engines.addEventListener('change', async (event) => {
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const searchUrl = customSearch.value.trim();
-  const suggestUrl = customSuggest.value.trim();
-  if (!isValidTemplate(searchUrl) || (suggestUrl && !isValidTemplate(suggestUrl))) {
+  if (!isValidTemplate(searchUrl)) {
     showStatus(t('errorTemplate'), true);
     return;
   }
-  await setEngineSetting({ id: CUSTOM_ID, searchUrl, suggestUrl: suggestUrl || null });
+  await setEngineSetting({ id: CUSTOM_ID, searchUrl });
   showStatus(t('saved'));
 });
 
 localize();
 renderEngines();
+renderSuggestSource();
 load();

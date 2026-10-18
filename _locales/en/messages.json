@@ -8,9 +8,14 @@
   "engineCustom": { "message": "Custom" },
   "engine_baidu": { "message": "Baidu" },
   "customSearchLabel": { "message": "Search URL (use %s for the search terms)" },
-  "customSuggestLabel": { "message": "Suggestion URL (optional, use %s for the search terms)" },
   "save": { "message": "Save" },
   "saved": { "message": "Saved." },
   "errorTemplate": { "message": "The URL must start with http:// or https:// and contain %s exactly once." },
+  "suggestSource": {
+    "message": "Address bar suggestions come from $ENGINE$. They're fixed by the package you installed, so switching the search engine above doesn't change them.",
+    "placeholders": { "engine": { "content": "$1" } }
+  },
+  "suggestOff": { "message": "The package you installed has no address bar suggestions." },
+  "suggestHowToOff": { "message": "To turn suggestions off, switch off \"Show me search and site suggestions using my typed characters\" in edge://settings/search." },
   "howItWorks": { "message": "Edge sends address bar searches to a placeholder address that never resolves, and NoMoreBing redirects them to the engine you chose before any request leaves the browser. To give control back to Edge, turn off or remove the extension." }
 }

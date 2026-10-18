@@ -133,4 +133,20 @@ test('locales define the same keys, covering everything the options page uses', 
   for (const [, key] of html.matchAll(/data-i18n="([^"]+)"/g)) {
     assert.ok(key in en, key);
   }
+  const js = readFileSync(new URL('../src/options/options.js', import.meta.url), 'utf8');
+  for (const [, key] of js.matchAll(/\bt\('([^']+)'/g)) {
+    assert.ok(key in en, key);
+  }
+});
+
+test('placeholders are defined the same way in every locale', () => {
+  const en = readJson('../_locales/en/messages.json');
+  const zh = readJson('../_locales/zh_CN/messages.json');
+  const names = (message) =>
+    [...message.matchAll(/\$([A-Z_]+)\$/g)].map(([, n]) => n.toLowerCase()).sort();
+  for (const [key, { message, placeholders }] of Object.entries(en)) {
+    assert.deepEqual(Object.keys(placeholders ?? {}).sort(), names(message), key);
+    assert.deepEqual(names(zh[key].message), names(message), key);
+    assert.deepEqual(zh[key].placeholders, placeholders, key);
+  }
 });

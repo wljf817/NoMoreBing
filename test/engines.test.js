@@ -4,10 +4,8 @@ import { readFileSync } from 'node:fs';
 import {
   CUSTOM_ID,
   PLACEHOLDER_SEARCH_URL,
-  PLACEHOLDER_SUGGEST_URL,
   PRESETS,
   SEARCH_RULE_ID,
-  SUGGEST_RULE_ID,
   buildRules,
   isValidTemplate,
   resolveEngine,
@@ -53,13 +51,9 @@ test('resolveEngine falls back to the default preset', () => {
   assert.equal(resolveEngine({ id: CUSTOM_ID, searchUrl: 'bad' }).searchUrl, google.searchUrl);
 });
 
-test('resolveEngine keeps a valid custom engine and drops an invalid suggest URL', () => {
-  const engine = resolveEngine({
-    id: CUSTOM_ID,
-    searchUrl: 'https://example.com/?q=%s',
-    suggestUrl: 'oops',
-  });
-  assert.deepEqual(engine, { searchUrl: 'https://example.com/?q=%s', suggestUrl: null });
+test('resolveEngine keeps a valid custom engine', () => {
+  const engine = resolveEngine({ id: CUSTOM_ID, searchUrl: 'https://example.com/?q=%s' });
+  assert.deepEqual(engine, { searchUrl: 'https://example.com/?q=%s' });
 });
 
 test('search rule redirects placeholder searches to the engine', () => {
@@ -86,28 +80,24 @@ test('search rule ignores URLs other than the placeholder', () => {
   assert.equal(redirect(rule, 'https://nomorebing.invalid.example.com/search?q=cats'), null);
 });
 
-test('suggest rule redirects only when the engine has a suggest URL', () => {
+test('only the search rule is built, since suggest requests bypass DNR', () => {
   const rules = buildRules(resolveEngine({ id: 'baidu' }));
-  const suggest = rules.find((r) => r.id === SUGGEST_RULE_ID);
-  assert.equal(
-    redirect(suggest, placeholder(PLACEHOLDER_SUGGEST_URL, 'abc')),
-    'https://suggestion.baidu.com/su?action=opensearch&ie=utf-8&wd=abc',
-  );
-
-  const withoutSuggest = buildRules({ searchUrl: 'https://example.com/?q=%s', suggestUrl: null });
-  assert.deepEqual(withoutSuggest.map((r) => r.id), [SEARCH_RULE_ID]);
+  assert.deepEqual(rules.map((r) => r.id), [SEARCH_RULE_ID]);
 });
 
-test('manifest search provider uses the same placeholders as the rules', () => {
+test('manifest search provider uses the placeholder the rules redirect', () => {
   const manifest = readJson('../manifest.json');
   const provider = manifest.chrome_settings_overrides.search_provider;
   assert.equal(provider.search_url, PLACEHOLDER_SEARCH_URL);
-  assert.equal(provider.suggest_url, PLACEHOLDER_SUGGEST_URL);
   assert.equal(provider.is_default, true);
-  for (const url of [PLACEHOLDER_SEARCH_URL, PLACEHOLDER_SUGGEST_URL]) {
-    const origin = new URL(url.replace('{searchTerms}', 'x')).origin;
-    assert.ok(manifest.host_permissions.includes(`${origin}/*`), origin);
-  }
+  const origin = new URL(PLACEHOLDER_SEARCH_URL.replace('{searchTerms}', 'x')).origin;
+  assert.deepEqual(manifest.host_permissions, [`${origin}/*`]);
+});
+
+test('manifest suggest_url is one of the preset suggestion URLs', () => {
+  const provider = readJson('../manifest.json').chrome_settings_overrides.search_provider;
+  const templates = PRESETS.map((p) => p.suggestUrl.replace('%s', '{searchTerms}'));
+  assert.ok(templates.includes(provider.suggest_url), provider.suggest_url);
 });
 
 test('manifest search provider has the keys Chromium requires without prepopulated_id', () => {
@@ -115,7 +105,7 @@ test('manifest search provider has the keys Chromium requires without prepopulat
   for (const key of ['name', 'keyword', 'encoding', 'favicon_url', 'search_url']) {
     assert.ok(provider[key], key);
   }
-  for (const key of ['search_url', 'suggest_url', 'favicon_url']) {
+  for (const key of ['search_url', 'suggest_url', 'favicon_url'].filter((k) => provider[k])) {
     const { protocol } = new URL(provider[key].replace('{searchTerms}', 'x'));
     assert.ok(protocol === 'https:' || protocol === 'http:', key);
   }

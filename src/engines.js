@@ -1,13 +1,14 @@
 // Pure engine logic: no chrome.* APIs here, so it can be unit-tested in Node.
 
-// Must match chrome_settings_overrides.search_provider in manifest.json.
-// `.invalid` never resolves, so if a redirect rule is missing the query goes nowhere.
+// Must match chrome_settings_overrides.search_provider.search_url in manifest.json.
+// `.invalid` never resolves, so if the redirect rule is missing the query goes nowhere.
+// Suggestions can't use the same trick: Edge fetches them from the browser
+// process, which extensions can't intercept, so suggest_url points straight at
+// a provider and is fixed per build.
 export const PLACEHOLDER_SEARCH_URL = 'https://nomorebing.invalid/search?q={searchTerms}';
-export const PLACEHOLDER_SUGGEST_URL = 'https://nomorebing.invalid/suggest?q={searchTerms}';
 
 export const SEARCH_RULE_ID = 1;
-export const SUGGEST_RULE_ID = 2;
-export const RULE_IDS = [SEARCH_RULE_ID, SUGGEST_RULE_ID];
+export const RULE_IDS = [SEARCH_RULE_ID];
 
 export const PRESETS = [
   {
@@ -65,19 +66,16 @@ export function isValidTemplate(template) {
   }
 }
 
-// Turns a stored setting into { searchUrl, suggestUrl }, falling back to the
-// default preset when the setting is unknown or invalid.
+// Turns a stored setting into { searchUrl }, falling back to the default
+// preset when the setting is unknown or invalid.
 export function resolveEngine(setting) {
   if (setting?.id === CUSTOM_ID && isValidTemplate(setting.searchUrl)) {
-    return {
-      searchUrl: setting.searchUrl,
-      suggestUrl: isValidTemplate(setting.suggestUrl) ? setting.suggestUrl : null,
-    };
+    return { searchUrl: setting.searchUrl };
   }
   const preset =
     PRESETS.find((p) => p.id === setting?.id) ??
     PRESETS.find((p) => p.id === DEFAULT_SETTING.id);
-  return { searchUrl: preset.searchUrl, suggestUrl: preset.suggestUrl };
+  return { searchUrl: preset.searchUrl };
 }
 
 // Regex that captures the already-encoded search terms from a placeholder URL.
@@ -90,11 +88,9 @@ export function placeholderRegex(placeholderUrl) {
   return `^${escaped}([^&#]*).*$`;
 }
 
-// Builds the declarativeNetRequest dynamic rules for an engine. Without a
-// suggestion URL no suggest rule is added, so suggestion requests stay on the
-// unresolvable placeholder and fail quietly.
-export function buildRules({ searchUrl, suggestUrl }) {
-  const rules = [
+// Builds the declarativeNetRequest dynamic rules for an engine.
+export function buildRules({ searchUrl }) {
+  return [
     {
       id: SEARCH_RULE_ID,
       priority: 1,
@@ -108,19 +104,4 @@ export function buildRules({ searchUrl, suggestUrl }) {
       },
     },
   ];
-  if (suggestUrl) {
-    rules.push({
-      id: SUGGEST_RULE_ID,
-      priority: 1,
-      action: {
-        type: 'redirect',
-        redirect: { regexSubstitution: suggestUrl.replace('%s', '\\1') },
-      },
-      condition: {
-        regexFilter: placeholderRegex(PLACEHOLDER_SUGGEST_URL),
-        resourceTypes: ['xmlhttprequest', 'other'],
-      },
-    });
-  }
-  return rules;
 }

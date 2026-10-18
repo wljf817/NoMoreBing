@@ -110,6 +110,17 @@ test('manifest search provider uses the same placeholders as the rules', () => {
   }
 });
 
+test('manifest search provider has the keys Chromium requires without prepopulated_id', () => {
+  const provider = readJson('../manifest.json').chrome_settings_overrides.search_provider;
+  for (const key of ['name', 'keyword', 'encoding', 'favicon_url', 'search_url']) {
+    assert.ok(provider[key], key);
+  }
+  for (const key of ['search_url', 'suggest_url', 'favicon_url']) {
+    const { protocol } = new URL(provider[key].replace('{searchTerms}', 'x'));
+    assert.ok(protocol === 'https:' || protocol === 'http:', key);
+  }
+});
+
 test('locales define the same keys, covering everything the options page uses', () => {
   const en = readJson('../_locales/en/messages.json');
   const zh = readJson('../_locales/zh_CN/messages.json');

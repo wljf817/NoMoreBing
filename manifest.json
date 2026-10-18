@@ -20,6 +20,7 @@
       "keyword": "nomorebing",
       "search_url": "https://nomorebing.invalid/search?q={searchTerms}",
       "suggest_url": "https://nomorebing.invalid/suggest?q={searchTerms}",
+      "favicon_url": "https://nomorebing.invalid/favicon.ico",
       "encoding": "UTF-8",
       "is_default": true
     }

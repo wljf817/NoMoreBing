@@ -20,3 +20,6 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
 
 chrome.runtime.onStartup.addListener(applyEngine);
 onEngineSettingChanged(applyEngine);
+
+// The toolbar button has no popup; it just opens the options page.
+chrome.action.onClicked.addListener(() => chrome.runtime.openOptionsPage());

@@ -16,6 +16,13 @@
     "service_worker": "src/background.js",
     "type": "module"
   },
+  "action": {
+    "default_title": "__MSG_extName__",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
   "options_ui": {
     "page": "src/options/options.html",
     "open_in_tab": true

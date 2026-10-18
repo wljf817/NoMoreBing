@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "description": "__MSG_extDescription__",
+  "version": "0.1.0",
+  "default_locale": "en",
+  "permissions": ["declarativeNetRequest", "storage"],
+  "host_permissions": ["https://nomorebing.invalid/*"],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+  "chrome_settings_overrides": {
+    "search_provider": {
+      "name": "__MSG_searchProviderName__",
+      "keyword": "nomorebing",
+      "search_url": "https://nomorebing.invalid/search?q={searchTerms}",
+      "suggest_url": "https://nomorebing.invalid/suggest?q={searchTerms}",
+      "encoding": "UTF-8",
+      "is_default": true
+    }
+  }
+}

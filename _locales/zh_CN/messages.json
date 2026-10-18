@@ -1,0 +1,16 @@
+{
+  "extName": { "message": "NoMoreBing" },
+  "extDescription": { "message": "阻止 Edge 未经同意把地址栏搜索引擎悄悄改回 Bing。" },
+  "searchProviderName": { "message": "NoMoreBing" },
+
+  "optionsTitle": { "message": "NoMoreBing 设置" },
+  "optionsIntro": { "message": "NoMoreBing 启用期间由它控制 Edge 的地址栏搜索引擎，Edge 无法把它改回 Bing。请选择搜索要发往哪里：" },
+  "engineCustom": { "message": "自定义" },
+  "engine_baidu": { "message": "百度" },
+  "customSearchLabel": { "message": "搜索地址（用 %s 表示搜索词）" },
+  "customSuggestLabel": { "message": "联想地址（可选，用 %s 表示搜索词）" },
+  "save": { "message": "保存" },
+  "saved": { "message": "已保存。" },
+  "errorTemplate": { "message": "地址必须以 http:// 或 https:// 开头，并且只包含一个 %s。" },
+  "howItWorks": { "message": "Edge 会把地址栏搜索发往一个永远无法访问的占位地址，NoMoreBing 在请求离开浏览器之前把它重定向到你选的引擎。想把控制权交还给 Edge，关闭或移除本扩展即可。" }
+}

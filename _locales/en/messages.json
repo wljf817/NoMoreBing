@@ -1,0 +1,16 @@
+{
+  "extName": { "message": "NoMoreBing" },
+  "extDescription": { "message": "Keeps Edge from silently switching your address bar search engine back to Bing." },
+  "searchProviderName": { "message": "NoMoreBing" },
+
+  "optionsTitle": { "message": "NoMoreBing settings" },
+  "optionsIntro": { "message": "While NoMoreBing is enabled, it controls Edge's address bar search engine, so Edge can't switch it back to Bing. Choose where your searches go:" },
+  "engineCustom": { "message": "Custom" },
+  "engine_baidu": { "message": "Baidu" },
+  "customSearchLabel": { "message": "Search URL (use %s for the search terms)" },
+  "customSuggestLabel": { "message": "Suggestion URL (optional, use %s for the search terms)" },
+  "save": { "message": "Save" },
+  "saved": { "message": "Saved." },
+  "errorTemplate": { "message": "The URL must start with http:// or https:// and contain %s exactly once." },
+  "howItWorks": { "message": "Edge sends address bar searches to a placeholder address that never resolves, and NoMoreBing redirects them to the engine you chose before any request leaves the browser. To give control back to Edge, turn off or remove the extension." }
+}

@@ -56,3 +56,7 @@ Run the tests with Node.js 20 or later:
 ```
 npm test
 ```
+
+## License
+
+[GPL-3.0](LICENSE)
